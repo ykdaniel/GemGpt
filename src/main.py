@@ -12,7 +12,7 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "resilience.log"))
+        logging.FileHandler(os.path.join(os.path.dirname(os.path.abspath(__file__)), "resilience.log"))
     ]
 )
 logger = logging.getLogger(__name__)
@@ -29,8 +29,6 @@ def main():
     
     # Initialize UI
     app = ResilienceConsole(root, adapter)
-    
-    logger.info("Resilience Adapter Started")
     
     logger.info("Resilience Adapter Started")
     

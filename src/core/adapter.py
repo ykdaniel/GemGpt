@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 import random
 from src.core.browser import BrowserManager
@@ -32,7 +33,7 @@ class ResilienceAdapter:
 
     def connect(self):
         if not self.browser_manager.playwright:
-             return self.browser_manager.connect()
+            return self.browser_manager.connect()
         return True
 
     def _clean_ai_response(self, content: str) -> str:
@@ -45,8 +46,6 @@ class ResilienceAdapter:
         Returns:
             清理後的內容
         """
-        import re
-        
         if not content:
             return content
         
@@ -58,14 +57,14 @@ class ResilienceAdapter:
             r'^Gemini 說:',
             r'^ChatGPT 說:',
             r'^你說:',
-            r'需要我.*?嗎[?？]?$',
-            r'還有什麼.*?嗎[?？]?$',
-            r'如果.*?請.*?[。!！]?$',
-            r'請問.*?嗎[?？]?$',
-            r'有任何.*?嗎[?？]?$',
+            r'需要我.*?嗎[?？]$',
+            r'還有什麼.*?嗎[?？]$',
+            r'如果.*?請.*?[。!！]$',
+            r'請問.*?嗎[?？]$',
+            r'有任何.*?嗎[?？]$',
             r'要不要.*?[?？]$',
-            r'想要.*?嗎[?？]?$',
-            r'希望.*?嗎[?？]?$',
+            r'想要.*?嗎[?？]$',
+            r'希望.*?嗎[?？]$',
         ]
         
         # 常見的 AI 反問句模式(英文)
@@ -73,14 +72,14 @@ class ResilienceAdapter:
             r'^Gemini said:',
             r'^ChatGPT said:',
             r'^You said:',
-            r'Is there anything else.*?[?]?$',
-            r'Would you like.*?[?]?$',
-            r'Do you need.*?[?]?$',
-            r'Let me know if.*?[.!]?$',
-            r'Feel free to.*?[.!]?$',
-            r'Can I help.*?[?]?$',
-            r'Should I.*?[?]?$',
-            r'Would you.*?[?]?$',
+            r'Is there anything else.*?[?]$',
+            r'Would you like.*?[?]$',
+            r'Do you need.*?[?]$',
+            r'Let me know if.*?[.!]$',
+            r'Feel free to.*?[.!]$',
+            r'Can I help.*?[?]$',
+            r'Should I.*?[?]$',
+            r'Would you.*?[?]$',
         ]
         
         
@@ -222,7 +221,7 @@ class ResilienceAdapter:
         content = self._clean_ai_response(content)
         
         # (New) 附加壓力測試提示詞
-        if stress_test:
+        if stress_test and content:
             stress_prompt = "\n\n請對我剛才的邏輯進行一次『壓力測試』。請針對我的論點提出 2 個最具挑戰性的反對意見，並指出我可能忽略掉的隱性前提或關鍵細節。"
             content += stress_prompt
             logger.info("Appended Stress Test prompt")

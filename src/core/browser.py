@@ -12,17 +12,22 @@ class BrowserManager:
         self.playwright = None
         self.browser = None
         self.context = None
-        self.log_file = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), "browser_debug.log")
+        self.log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "browser_debug.log")
         self.stealth = StealthStrategy()
 
     def log(self, message):
         try:
             with open(self.log_file, "a", encoding="utf-8") as f:
                 f.write(f"{time.ctime()} - {message}\n")
-        except:
+        except Exception:
             pass
 
     def _find_edge_path(self):
+        # 嘗試用 shutil.which 找到 Edge（支援非預設安裝路徑）
+        edge_cmd = shutil.which("msedge") or shutil.which("microsoft-edge")
+        if edge_cmd:
+            return edge_cmd
+
         paths = [
             r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
             r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"
@@ -75,6 +80,8 @@ class BrowserManager:
                 self.browser = self.playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{self.debug_port}")
                 if self.browser.contexts:
                     self.context = self.browser.contexts[0]
+                else:
+                    self.log("Warning: Browser connected but no contexts found.")
                 self.log(f"Connected to Browser. Contexts: {len(self.browser.contexts)}")
                 
                 # 注入 stealth 腳本到所有 context
@@ -131,6 +138,7 @@ class BrowserManager:
     def _ensure_tabs(self):
         """確保 Gemini 和 ChatGPT 分頁已開啟"""
         if not self.context:
+            self.log("Warning: No browser context available. Cannot ensure tabs.")
             return
             
         required_tabs = {
@@ -170,5 +178,10 @@ class BrowserManager:
             self.log(f"Failed to inject stealth: {e}")
 
     def close(self):
+        if self.browser:
+            try:
+                self.browser.close()
+            except Exception:
+                pass
         if self.playwright:
             self.playwright.stop()
