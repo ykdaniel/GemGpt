@@ -1,4 +1,6 @@
 import logging
+import random
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +18,6 @@ class SelectorTrustTier:
         Iterates through tiers to find the first working selector.
         Returns: (element_handle, tier_index) or (None, -1)
         """
-        import random
-        import time
-        
         for i, selector in enumerate(self.tiers):
             try:
                 # 使用隨機 timeout (800-1500ms) 避免機械化模式
@@ -26,7 +25,7 @@ class SelectorTrustTier:
                 element = page.wait_for_selector(selector, timeout=timeout, state="visible")
                 if element:
                     if i > 0:
-                         logger.warning(f"Degradation Signal: Using Tier {i} selector: {selector}")
+                        logger.warning(f"Degradation Signal: Using Tier {i} selector: {selector}")
                     return element, i
             except Exception:
                 # 查詢失敗時加入短暫隨機延遲(模擬人類反應)
