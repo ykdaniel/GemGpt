@@ -170,9 +170,9 @@ class ResilienceConsole:
                 self.root.after(0, lambda: self.set_buttons_state("disabled"))
                 
                 result = func(*args)
-                
-                self.root.after(0, lambda: self.update_status(result))
-                self.root.after(0, lambda: self.log_message(f"Task Completed: {result}"))
+
+                self.root.after(0, lambda r=result: self.update_status(r))
+                self.root.after(0, lambda r=result: self.log_message(f"Task Completed: {r}"))
                 
             except Exception as e:
                 logger.error(f"Worker Error: {e}")
@@ -242,6 +242,9 @@ class ResilienceConsole:
             self.tag = tag
 
         def write(self, string):
+            self.text_widget.after(0, self._append, string)
+
+        def _append(self, string):
             self.text_widget.configure(state="normal")
             self.text_widget.insert("end", string)
             self.text_widget.see("end")
