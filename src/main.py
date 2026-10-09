@@ -1,7 +1,4 @@
-import tkinter as tk
 import logging
-import threading
-import sys
 import os
 from src.core.adapter import ResilienceAdapter
 from src.ui.console import ResilienceConsole
